@@ -10,7 +10,7 @@ output:
 ---
 
 <div>
-<h1>DiagrammeR</h1>
+<img src="./img/DiagrammeR.png" alt = "DiagrammeR" style = "max-width:50%;"></img>
 <h2>mermaid.js</h2>
 
 ```{r}
