@@ -4,10 +4,42 @@
 \alias{vivagraph}
 \title{Render graphs with VivaGraphJS}
 \usage{
-vivagraph(network = NULL, options = list(), height = NULL, width = NULL)
+vivagraph(nodes_df = data.frame(), edges_df = data.frame(), igrf = NULL,
+  layout = "forceDirected", positions = NULL, config = NULL,
+  height = NULL, width = NULL, elementId = NULL)
 }
 \arguments{
-\item{network}{\code{list} generated from \code{\link{create_graph}}}
+\item{nodes_df}{\code{data.frame} or \code{vector} providing an identifier
+for each node.  If \code{nodes_df} is a \code{data.frame}, then all other
+columns besides \code{[,1]} or \code{[,"id"]} will be assigned as attributes.}
+
+\item{edges_df}{\code{data.frame} [or \code{vector} of edges providing a from/source
+node identifier and a to/target node identifier.
+If \code{edges_df} contains >2 columns, then all other
+columns besides \code{[,1:2]} will be assigned as attributes.}
+
+\item{igrf}{\code{igraph} graph.  We will try to smartly convert the \code{igrf}
+using \code{get.data.frame( what = "both" )}.}
+
+\item{layout}{\code{string} or a layout function from \code{igraph}.  \code{"forceDirected"}
+the default and will use the \code{"forceDirected"} layout engine from
+VivaGraphJS/ngraph.forceDirected.  \code{"constant"} is the other \code{string}
+option for layout.  However, if desired, we can also take advantage of a
+layout function from \code{igraph}, by providing this as our \code{layout} parameter.}
+
+\item{positions}{\code{data.frame} of two columns \code{x} and \code{y} with fixed
+positions if you intend to provide preset positions for nodes.}
+
+\item{config}{\code{list} of other config options.  While currently this does nothing,
+we expect to add additional configuration options here.}
+
+\item{height}{\code{string} or \code{integer} with a valid CSS \code{height} for the container
+for our htmlwidget.}
+
+\item{width}{\code{string} or \code{integer} with a valid CSS \code{width} for the container
+for our htmlwidget.}
+
+\item{elementID}{\code{string} with a valid CSS \code{id}.}
 }
 \description{
 Render graphs with VivaGraphJS

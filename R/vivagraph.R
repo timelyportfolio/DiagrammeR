@@ -1,19 +1,113 @@
 #' Render graphs with VivaGraphJS
 #'
-#' @param network \code{list} generated from \code{\link{create_graph}}
+#' @param nodes_df \code{data.frame} or \code{vector} providing an identifier
+#'            for each node.  If \code{nodes_df} is a \code{data.frame}, then all other
+#'            columns besides \code{[,1]} or \code{[,"id"]} will be assigned as attributes.
+#' @param edges_df \code{data.frame} [or \code{vector} of edges providing a from/source 
+#'            node identifier and a to/target node identifier.
+#'            If \code{edges_df} contains >2 columns, then all other
+#'            columns besides \code{[,1:2]} will be assigned as attributes.
+#' @param igrf \code{igraph} graph.  We will try to smartly convert the \code{igrf}
+#'            using \code{get.data.frame( what = "both" )}.
+#' @param layout \code{string} or a layout function from \code{igraph}.  \code{"forceDirected"}
+#'            the default and will use the \code{"forceDirected"} layout engine from 
+#'            VivaGraphJS/ngraph.forceDirected.  \code{"constant"} is the other \code{string}
+#'            option for layout.  However, if desired, we can also take advantage of a
+#'            layout function from \code{igraph}, by providing this as our \code{layout} parameter.
+#' @param positions \code{data.frame} of two columns \code{x} and \code{y} with fixed
+#'            positions if you intend to provide preset positions for nodes.
+#' @param config \code{list} of other config options.  While currently this does nothing,
+#'            we expect to add additional configuration options here.
+#' @param width \code{string} or \code{integer} with a valid CSS \code{width} for the container
+#'            for our htmlwidget.
+#' @param height \code{string} or \code{integer} with a valid CSS \code{height} for the container
+#'            for our htmlwidget.
+#' @param elementID \code{string} with a valid CSS \code{id}.
 #' 
 #' @export
 
 vivagraph <- function(
-  network = NULL
-  , options = list()
+  nodes_df = data.frame()
+  , edges_df = data.frame()
+  , igrf  = NULL
+  , layout = "forceDirected"
+  , positions = NULL
+  , config = NULL
   , height = NULL
   , width = NULL
+  , elementId = NULL
 ) {
+    #  if nodes_df provided then check to make sure there is a column named id
+    #    if not then name the first column id
+    if( is.data.frame(nodes_df) ) {
+      if( nrow(nodes_df) > 0 ){
+        if( !("id" %in% colnames(nodes_df) ) ) {
+          colnames(nodes_df)[1] <- "id"
+        }
+      }
+    }
+    
+    #  if edges_df provided then check to make sure there is a column named from and to
+    #    if not then name the first column from
+    #                name the second column to
+    if( is.data.frame(edges_df) ) {
+      if( nrow(edges_df) > 0 && ncol(edges_df) > 1 ){
+        if( !("from" %in% colnames(nodes_df) ) || !("to" %in% colnames(nodes_df) ) ) {
+          colnames(edges_df)[1] <- "from"
+          colnames(edges_df)[2] <- "to"
+        }
+      } else if( ncol(edges_df) > 0 && ncol(edges_df) < 2 ) {
+        warning(
+          "vivagraph expects edges_df to contain at least two columns for source->target"
+          , call. = FALSE
+        )
+      }
+    }
+    
+    #  if nodes_df is a vector then make it a data.frame with column named id
+    if( is.vector(nodes_df) ) {
+      nodes_df <- data.frame( id = nodes_df )
+    }
+    
+    # check to see if nodes_df is an igraph
+    if( inherits(nodes_df,"igraph") ) {
+      # try to make this easy if someone accidentally provides an igraph
+      #  as the first parameter
+      igrf <- nodes_df
+      nodes_df <- data.frame()
+    }
+    
+    #  if we are given an igraph
+    #   try to smartly convert using get.data.frame
+    if(inherits(igrf, "igraph")){
+      #  assume if we are given an igraph that igraph is available
+      igrf_df <- igraph::get.data.frame( igrf, what = "both" )
+      # warn if igraph provided as igrf and also nodes and edges
+      if(nrow(nodes_df) > 0) warning( "overwriting nodes with igraph igrf", call. = F )
+      if(nrow(edges_df) > 0) warning( "overwriting edges with igraph igrf", call. = F )
+      nodes_df <- data.frame(
+        id = igrf_df$vertices[,1]
+        ,igrf_df$vertices[,-1]
+        ,stringsAsFactors = F
+      )
+      edges_df <- igrf_df$edges
+      
+      #  if position is a function then assume a layout for igraph
+      if (is.function(layout)){
+        positions = layout.norm( layout(igrf), xmin = -1, xmax = 1, ymin = -1, ymax = 1 )
+        positions = data.frame(
+          x = positions[,1] * 100
+          ,y = -positions[,2] * 100
+        )
+        layout = "constant"
+      }
+    }
     
     x <- list(
-      network = network
-      , options = options
+      network = list( nodes_df = nodes_df, edges_df = edges_df )
+      , layout = layout
+      , positions = positions
+      , config = config
     )
     
     # Create widget
@@ -22,7 +116,8 @@ vivagraph <- function(
       x = x,
       width = width,
       height = height,
-      package = "DiagrammeR"
+      package = "DiagrammeR",
+      elementId = elementId
     )    
 }
 
