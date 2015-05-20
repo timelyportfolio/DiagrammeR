@@ -48,12 +48,8 @@ Render graphs with VivaGraphJS
 \dontrun{
 library(DiagrammeR)
 
-# using the create_graph function
-
+###### using the create_graph function
 ###### DiagrammeR example from http://rich-iannone.github.io/DiagrammeR/graphs.html ####
-###
-# Create a graph
-###
 
 nodes <-
 create_nodes(nodes = LETTERS,
@@ -83,6 +79,19 @@ graph <-
                               "arrowsize = 0.5"))
 
 vivagraph( graph$nodes_df, graph$edges_df )
+
+###### using the igraph examples
+library(igraph)
+library(DiagrammeR)
+
+vivagraph( graph.ring(10) )
+
+vivagraph( erdos.renyi.game(100,1/100) )
+
+# utilizing igraph layout
+vivagraph( erdos.renyi.game(100,1/100), layout = layout.circle )
+vivagraph( graph.famous("Zachary"), layout = layout.grid )
+
 }
 }
 

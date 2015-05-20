@@ -66,6 +66,12 @@
 #' 
 #' vivagraph( graph.ring(10) )
 #' 
+#' vivagraph( erdos.renyi.game(100,1/100) )
+#' 
+#' # utilizing igraph layout
+#' vivagraph( erdos.renyi.game(100,1/100), layout = layout.circle )
+#' vivagraph( graph.famous("Zachary"), layout = layout.grid )
+#' 
 #' }
 #' 
 #' @export
@@ -135,8 +141,12 @@ vivagraph <- function(
           ,igrf_df$vertices[,-1]
           ,stringsAsFactors = F
         )
+      } else {
+        #  if no nodes then just take all unique values from edges
+        nodes_df <- data.frame(
+          id = unique( c(igrf_df$edges$from,igrf_df$edges$to) )
+        )
       }
-      
       edges_df <- igrf_df$edges
       
       #  if position is a function then assume a layout for igraph
