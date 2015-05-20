@@ -94,7 +94,7 @@ HTMLWidgets.widget({
             var svgText = Viva.Graph.svg('text')
                             .attr('y', '-12px')
                             .attr('x', '-8px')
-                            .text(node.data.id);
+                            .text(node.id);
   
             var img = Viva.Graph.svg('circle')
                         .attr('r', 7)

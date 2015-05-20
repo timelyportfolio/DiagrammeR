@@ -24,6 +24,50 @@
 #'            for our htmlwidget.
 #' @param elementID \code{string} with a valid CSS \code{id}.
 #' 
+#' @examples
+#' \dontrun{
+#' library(DiagrammeR)
+#' 
+#' ###### using the create_graph function
+#' ###### DiagrammeR example from http://rich-iannone.github.io/DiagrammeR/graphs.html ####
+#' 
+#' nodes <-
+#' create_nodes(nodes = LETTERS,
+#'                type = "letter",
+#'                shape = sample(c("circle", "rectangle"),
+#'                               length(LETTERS),
+#'                               replace = TRUE),
+#'                fillcolor = sample(c("aqua", "gray80",
+#'                                     "pink", "lightgreen",
+#'                                     "azure", "yellow"),
+#'                                   length(LETTERS),
+#'                                   replace = TRUE))
+#' 
+#' edges <-
+#' create_edges(edge_from = sample(LETTERS, replace = TRUE),
+#'                edge_to = sample(LETTERS, replace = TRUE),
+#'                relationship = "letter_to_letter")
+#' 
+#' 
+#' graph <-
+#'   create_graph(nodes_df = nodes,
+#'                edges_df = edges,
+#'                graph_attrs = "layout = neato",
+#'                node_attrs = c("fontname = Helvetica",
+#'                               "style = filled"),
+#'                edge_attrs = c("color = gray20",
+#'                               "arrowsize = 0.5"))
+#'                               
+#' vivagraph( graph$nodes_df, graph$edges_df )
+#' 
+#' ###### using the igraph examples
+#' library(igraph)
+#' library(DiagrammeR)
+#' 
+#' vivagraph( graph.ring(10) )
+#' 
+#' }
+#' 
 #' @export
 
 vivagraph <- function(
@@ -85,11 +129,14 @@ vivagraph <- function(
       # warn if igraph provided as igrf and also nodes and edges
       if(nrow(nodes_df) > 0) warning( "overwriting nodes with igraph igrf", call. = F )
       if(nrow(edges_df) > 0) warning( "overwriting edges with igraph igrf", call. = F )
-      nodes_df <- data.frame(
-        id = igrf_df$vertices[,1]
-        ,igrf_df$vertices[,-1]
-        ,stringsAsFactors = F
-      )
+      if( nrow(nodes_df) > 0) {
+        nodes_df <- data.frame(
+          id = igrf_df$vertices[,1]
+          ,igrf_df$vertices[,-1]
+          ,stringsAsFactors = F
+        )
+      }
+      
       edges_df <- igrf_df$edges
       
       #  if position is a function then assume a layout for igraph

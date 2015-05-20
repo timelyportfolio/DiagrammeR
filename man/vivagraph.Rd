@@ -44,4 +44,45 @@ for our htmlwidget.}
 \description{
 Render graphs with VivaGraphJS
 }
+\examples{
+\dontrun{
+library(DiagrammeR)
+
+# using the create_graph function
+
+###### DiagrammeR example from http://rich-iannone.github.io/DiagrammeR/graphs.html ####
+###
+# Create a graph
+###
+
+nodes <-
+create_nodes(nodes = LETTERS,
+               type = "letter",
+               shape = sample(c("circle", "rectangle"),
+                              length(LETTERS),
+                              replace = TRUE),
+               fillcolor = sample(c("aqua", "gray80",
+                                    "pink", "lightgreen",
+                                    "azure", "yellow"),
+                                  length(LETTERS),
+                                  replace = TRUE))
+
+edges <-
+create_edges(edge_from = sample(LETTERS, replace = TRUE),
+               edge_to = sample(LETTERS, replace = TRUE),
+               relationship = "letter_to_letter")
+
+
+graph <-
+  create_graph(nodes_df = nodes,
+               edges_df = edges,
+               graph_attrs = "layout = neato",
+               node_attrs = c("fontname = Helvetica",
+                              "style = filled"),
+               edge_attrs = c("color = gray20",
+                              "arrowsize = 0.5"))
+
+vivagraph( graph$nodes_df, graph$edges_df )
+}
+}
 
