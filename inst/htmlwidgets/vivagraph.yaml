@@ -1,9 +1,5 @@
 dependencies:
-  - name: es5-shim
-    version: 4.1.1
-    src: htmlwidgets/inst/lib/es5-shim
-    script: es5-shim.min.js
   - name: vivagraph
     version: 0.7.12
     src: htmlwidgets/lib/VivaGraphJS/dist
-    script: vivagraph.js
+    script: vivagraph.min.js
