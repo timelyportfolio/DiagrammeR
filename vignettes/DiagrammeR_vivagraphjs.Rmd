@@ -1,0 +1,111 @@
+---
+title: "DiagrammeR with VivaGraphJS"
+author: "Kent Russell"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DiagrammeR with VivaGraphJS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Diagrams aren't always networks, but very often networks become diagrams.  `DiagrammeR` began with  `mermaid`(`mermaid.js`) and `grViz`(`viz.js`/`graphviz`) as two powerful ways of rendering diagrams provided as a text specification.  `DiagrammeR`'s support of networks in non-text form continues to evolve.  With this support for networks in mind, adding a JavaScript library like [`VivaGraphJS`](https://github.com/anvaka/VivaGraphJS) gives `DiagrammeR` a interactive rendering engine focused on networks.
+
+As we discussed the idea of adding `VivaGraphJS` to `DiagrammeR`, we liked the idea of another rendering option but realized that it might not entirely fit in the long-term direction of `DiagrammeR`.  It seems for now that the primary use case reported in Github issues and other venues involves the `DOT` specification provided by `grViz`.  However, `DiagrammeR` currently does not aid in adding interactivity to the `grViz` diagrams.  It seems some combination of `grViz` + `vivagraph`, especially given some interchangeability and binding consistency, would be an ideal output.  Also, incorporating ideas and features from [`visNetwork`](http://dataknowledge.github.io/visNetwork/) would provide a very robust and interactive aesthetic result.
+
+## Seed for Iteration
+
+We'll start with the new function `vivagraph` as our seed for iteration.  Hopefully, it will give us some insight into new features, better coordination, additional interactivity, more network support, leveraging of existing R layouts, and additional unforeseen use cases.  Let's see some examples with the first rough draft.
+
+## Installation
+
+Since we are not entirely sure how this will be incorporated, currently `vivagraph` exists in its own Github branch.  To test out `vivagraph`, please install as shown below.  Note, existing functionality in `DiagrammeR` will be unaffected, so nothing should break.
+
+```{r eval=F}
+devtools::install_github( "timelyportfolio/DiagrammeR@feature/vivagraphjs" )
+```
+
+## With `create_graph` from DiagrammeR
+
+Rich Iannone has put quite a bit of effort into graph building functions that don't require knowledge of the specialized field of networks.  Here is an example using `create_graph` to build our nodes and edges but rendering with `vivagraph`.
+
+```{r}
+## please see install step above
+
+library( DiagrammeR )
+
+## use example create_graph from DiagrammeR documentation
+##   http://rich-iannone.github.io/DiagrammeR/graphs.html
+
+###
+# Create a graph
+###
+
+nodes <-
+  create_nodes(nodes = LETTERS,
+               type = "letter",
+               shape = sample(c("circle", "rectangle"),
+                              length(LETTERS),
+                              replace = TRUE),
+               fillcolor = sample(c("aqua", "gray80",
+                                    "pink", "lightgreen",
+                                    "azure", "yellow"),
+                                  length(LETTERS),
+                                  replace = TRUE))
+
+edges <-
+  create_edges(edge_from = sample(LETTERS, replace = TRUE),
+               edge_to = sample(LETTERS, replace = TRUE),
+               relationship = "letter_to_letter")
+
+
+graph <-
+  create_graph(nodes_df = nodes,
+               edges_df = edges,
+               graph_attrs = "layout = neato",
+               node_attrs = c("fontname = Helvetica",
+                              "style = filled"),
+               edge_attrs = c("color = gray20",
+                              "arrowsize = 0.5"))
+
+vivagraph( nodes, edges )
+```
+
+You might notice some interactivity that we don't get with `grViz`.  However, you will also probably notice that `vivagraph` is not aware of the styling, etc. that we applied on our nodes and edges.  This is definitely on the roadmap for future development.
+
+## With `igraph` network
+
+`DiagrammeR` does not have any built-in handlers for `igraph` and other powerful `R` network packages.  `vivagraph` does try to smartly handle `igraph` network graphs.
+
+```{r}
+library( DiagrammeR )
+library( igraph )
+
+# plot one of the graph.famous from igraph
+vivagraph( graph.famous( "Franklin" ) )
+```
+
+You might notice as above that any styling, etc. is not currently supported, but as above, this is definitely on the roadmap.
+
+If you love `igraph` layouts though, you should definitely like this.  In the examples above we used the default `forceDirected` layout from `VivaGraphJS`, but `vivagraph` can also use positions defined by `layout.*`.
+
+```{r}
+vivagraph( graph.famous( "Franklin" ), layout = layout.circle )
+```
+
+And here is an `igraph` plot for reference using `layout.circle`, so `vivagraph` leverages the layout engine while also adding interactivity and in the future various node types and styling.
+
+```{r}
+plot( graph.famous( "Franklin" ), layout = layout.circle )
+```
+
+Let's see a couple more to illustrate.
+
+```{r}
+vivagraph( graph.famous( "Dodecahedron" ), layout = layout.grid )
+```
+
+```{r}
+vivagraph( graph.famous( "Herschel" ), layout = layout.fruchterman.reingold )
+```
+
