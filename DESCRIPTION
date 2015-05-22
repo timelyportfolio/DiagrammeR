@@ -28,7 +28,7 @@ Authors@R: c(
         "Andrei","Kashcha"
         , role = c("aut", "cph")
         , comment = "vivagraphjs library in htmlwidgets/lib, https://github.com/anvaka/VivaGraphJS"
-      )
+      ),
       person(
         "Richard", "Iannone"
         , role = c("aut", "cre")
