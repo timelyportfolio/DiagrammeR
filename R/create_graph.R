@@ -8,7 +8,7 @@
 #' @param directed with \code{TRUE} (the default) or \code{FALSE}, either directed or undirected edge operations will be generated, respectively.
 #' @param graph_name an optional string for labeling the graph object.
 #' @param graph_time a date or date-time string (required for insertion of graph into a graph series of the type \code{temporal}).
-#' @param graph_tz an optional value for the time zone (tz) value corresponding to the date or date-time string supplied as a value to \code{graph_time}. If no time zone is provided then it will be set to \code{GMT}.
+#' @param graph_tz an optional value for the time zone (\code{tz}) value corresponding to the date or date-time string supplied as a value to \code{graph_time}. If no time zone is provided then it will be set to \code{GMT}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @export create_graph
 
@@ -32,13 +32,16 @@ create_graph <- function(nodes_df = NULL,
                        " {\n", "\n}")
 
     # Create the 'dgr_graph' list object
-    dgr_graph <- list(nodes_df = NULL,
-                     edges_df = NULL,
-                     graph_attrs = NULL,
-                     node_attrs = NULL,
-                     edge_attrs = NULL,
-                     directed = ifelse(directed == TRUE, TRUE, FALSE),
-                     dot_code = dot_code)
+    dgr_graph <- list(graph_name = graph_name,
+                      graph_time = graph_time,
+                      graph_tz = graph_tz,
+                      nodes_df = NULL,
+                      edges_df = NULL,
+                      graph_attrs = NULL,
+                      node_attrs = NULL,
+                      edge_attrs = NULL,
+                      directed = ifelse(directed == TRUE, TRUE, FALSE),
+                      dot_code = dot_code)
 
     attr(dgr_graph, "class") <- "dgr_graph"
 
