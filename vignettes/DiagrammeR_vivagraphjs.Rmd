@@ -9,17 +9,27 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Diagrams aren't always networks, but very often networks become diagrams.  `DiagrammeR` began with  `mermaid`(`mermaid.js`) and `grViz`(`viz.js`/`graphviz`) as two powerful ways of rendering diagrams provided as a text specification.  `DiagrammeR`'s support of networks in non-text form continues to evolve.  With this support for networks in mind, adding a JavaScript library like [`VivaGraphJS`](https://github.com/anvaka/VivaGraphJS) gives `DiagrammeR` a interactive rendering engine focused on networks.
+Way back in my first real post on this blog [Week 01 | Easy Flowcharts and Diagrams ~ DiagrammeR](http://www.buildingwidgets.com/blog/2015/1/8/week-01-easy-flowcharts-and-diagrams-diagrammer), we announced [`DiagrammeR`](http://rich-iannone.github.io/DiagrammeR).  Since then, `DiagrammeR`'s author Rich Iannone has amazed me with his efforts to improve, grow, and document (truly something special) the package.  `DiagrammeR` began with  `mermaid`(`mermaid.js`) and then quickly added `grViz`(`viz.js`/`graphviz`) as two methods to both layout and render diagrams specified as text.
 
-As we discussed the idea of adding `VivaGraphJS` to `DiagrammeR`, we liked the idea of another rendering option but realized that it might not entirely fit in the long-term direction of `DiagrammeR`.  It seems for now that the primary use case reported in Github issues and other venues involves the `DOT` specification provided by `grViz`.  However, `DiagrammeR` currently does not aid in adding interactivity to the `grViz` diagrams.  It seems some combination of `grViz` + `vivagraph`, especially given some interchangeability and binding consistency, would be an ideal output.  Also, incorporating ideas and features from [`visNetwork`](http://dataknowledge.github.io/visNetwork/) would provide a very robust and interactive aesthetic result.
+Even with all the dedicated efforts by Rich Iannone, there are still many ways `DiagrammeR` can improve, but much of the improvement depends on some determination of the strategic direction for `DiagrammeR`.  What I think Rich would like is a cohesive set of functionality that allows users easy access to multiple layout engines and interactive renderers while also leveraging strengths of existing R functionality.  With this in mind, areas of improvement can be grouped in three ways:
+
+1. interoperability within `DiagrammeR` - `mermaid` is completely separate and isolated from `grViz` with their own unique specification.
+1. interoperability with `R` - `R` is loaded with packages that could benefit `DiagrammeR`.  One example is networks.  Diagrams aren’t always networks, but very often networks become diagrams.  `DiagrammeR`'s support of networks in non-text form, such as `igraph`, does not exist.
+1. interactivity - Technically, a user can achieve interactivity in `DiagrammeR`, but only if the user has a thorough understanding of JavaScript.  Incorporating ideas and features like those in the new `htmlwidget` package [visNetwork](http://dataknowledge.github.io/visNetwork/) would provide a very robust and interactive aesthetic result.
+
+## Does VivaGraphJS fit in?
+
+Does the very nice JavaScript library [`VivaGraphJS`](https://github.com/anvaka/VivaGraphJS)/[`ngraph`](https://github.com/anvaka/ngraph) from Andrei Kashcha fit in `DiagrammeR`?  Adding [`VivaGraphJS`](https://github.com/anvaka/VivaGraphJS) gives `DiagrammeR` a interactive rendering engine focused on networks.  If possible, combining `VivaGraphJS` and `grViz` could prove very powerful and synergystic.  Similarly, `VivaGraphJS` could offer nice functionality to `igraph` and other `R` network packages.
+
+I should note that Keeghan Hines already started an `htmlwidget` implementation [`vivagRaph`](https://github.com/keeganhines/vivagRaph) that encouraged me to explore this further.  Thanks so much to Keeghan for his work here.
 
 ## Seed for Iteration
 
-We'll start with the new function `vivagraph` as our seed for iteration.  Hopefully, it will give us some insight into new features, better coordination, additional interactivity, more network support, leveraging of existing R layouts, and additional unforeseen use cases.  Let's see some examples with the first rough draft.
+Since learning often occurs best by doing, we'll start with a new function `vivagraph` as our seed for iteration.  Hopefully, it will give us some insight into new features, better coordination, additional interactivity, more network support, leveraging of existing R layouts, and additional unforeseen use cases.  Let's see some examples with the first rough draft of `vivagraph`.
 
 ## Installation
 
-Since we are not entirely sure how this will be incorporated, currently `vivagraph` exists in its own Github branch.  To test out `vivagraph`, please install as shown below.  Note, existing functionality in `DiagrammeR` will be unaffected, so nothing should break.
+We are not entirely sure how this will be incorporated, so currently `vivagraph` exists in its own Github branch.  To test out `vivagraph`, please install as shown below.  *Note, existing functionality in `DiagrammeR` will be unaffected, so nothing should break.*
 
 ```{r eval=F}
 devtools::install_github( "timelyportfolio/DiagrammeR@feature/vivagraphjs" )
@@ -109,3 +119,71 @@ vivagraph( graph.famous( "Dodecahedron" ), layout = layout.grid )
 vivagraph( graph.famous( "Herschel" ), layout = layout.fruchterman.reingold )
 ```
 
+## grViz with igraph layout
+
+As an example how we learn by doing, I discovered that `grViz` could also use `igraph` for layouts.  Even though there is no `vivagraph` in here, let's look at how we could eventually realize interoperability within `DiagrammeR`.  Our diagram will get some additional help from graphviz `splines` and `overlap`.  You can see this at work by closely comparing the bottom of our `grViz` diagram with the reference `igraph` plot below.
+
+```{r}
+library(DiagrammeR)
+library(igraph)
+library(pipeR)
+
+#### use igraph example from documentation
+actors <- data.frame(
+  name=c("Alice", "Bob", "Cecil", "David", "Esmeralda")
+  , age=c(48,33,45,34,21)
+  , gender=c("F","M","F","M","F")
+)
+relations <- data.frame(
+  from=c("Bob", "Cecil", "Cecil", "David", "David", "Esmeralda")
+  , to=c("Alice", "Bob", "Alice", "Alice", "Bob", "Alice")
+  , same.dept=c(FALSE,FALSE,TRUE,FALSE,FALSE,TRUE)
+  , friendship=c(4,5,5,2,1,1), advice=c(4,5,5,4,2,3)
+)
+g <- graph.data.frame(relations, directed=TRUE, vertices=actors)
+
+## use igraph layout for positions
+g_layout <- layout.grid(g)
+
+## now plot with DiagrammeR using igraph layout positions
+##  but use graphviz splines and overlap handling
+g %>>%
+  get.data.frame( what = "both" ) %>>%
+  (
+    # DiagrammeR create_graph helper function
+    create_graph(
+      data.frame(
+        nodes = rownames(.$vertices)
+        ,.$vertices
+        ,x = g_layout[,1]  # define our x from the igraph layout
+        ,y = g_layout[,2]  # define our y from the igraph layout
+      )
+      ,.$edges
+      ,graph_attrs = 'splines="true" overlap = "scale" label = "igraph + grViz"'
+    )
+  ) %>>%
+  (
+    grViz( .$dot_code, engine="neato" )
+  )
+```
+
+Let's compare to the default `igraph` plot.
+
+```{r}
+plot( g, layout = g_layout)
+```
+
+## Thoughts and Conclusion
+
+Even if `VivaGraphJS` does not fit in `DiagrammeR`, `DiagrammeR` can improve by learning from a `VivaGraphJS` experimental implementation.  **Please give us thoughts, feedback, use cases** to help us determine the future direction of `DiagrammeR`.
+
+
+## Thanks
+
+Thanks so much
+
+- [`VivaGraphJS`](https://github.com/anvaka/VivaGraphJS) from Andrei Kashcha
+- Keeghan Hines for his initial implementation [vivagRaph](https://github.com/keeganhines/vivagRaph)
+- Rich Iannone for his dedicated and admirable work on [`DiagrammeR`](http://rich-iannone.github.io/DiagrammeR)
+- Ramnath Vaidyanathan and RStudio for `htmlwidgets`
+- all the contributors to `R` and `JavaScript`
