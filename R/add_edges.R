@@ -1,5 +1,5 @@
 #' Add edges to an existing graph object
-#' With a graph object of class \code{dgr_graph}, add one or more edges of specified types to nodes within the graph.
+#' @description With a graph object of class \code{dgr_graph}, add one or more edges of specified types to nodes within the graph.
 #' @param graph a graph object of class \code{dgr_graph} that is created using \code{create_graph}.
 #' @param edges_df an edge data frame that is created using \code{create_edges}.
 #' @param from a vector of the outgoing nodes from which each edge is connected.
@@ -28,6 +28,9 @@ add_edges <- function(graph,
                      edges_df = create_edges(edge_from = from,
                                              edge_to = to,
                                              relationship = relationship),
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)
@@ -39,6 +42,9 @@ add_edges <- function(graph,
         create_graph(nodes_df = graph$nodes_df,
                      edges_df = create_edges(edge_from = from,
                                              edge_to = to),
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)
@@ -100,6 +106,9 @@ add_edges <- function(graph,
       dgr_graph <-
         create_graph(nodes_df = graph$nodes_df,
                      edges_df = combined_edges,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)
@@ -127,6 +136,9 @@ add_edges <- function(graph,
       dgr_graph <-
         create_graph(nodes_df = graph$nodes_df,
                      edges_df = combined_edges,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)

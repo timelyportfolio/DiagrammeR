@@ -1,5 +1,5 @@
 #' Get node IDs associated with edges
-#' Provides information on the node IDs associated with edges from one or more edge data frames, or, a graph object.
+#' @description Provides information on the node IDs associated with edges from one or more edge data frames, or, a graph object.
 #' @param ... a collection of edge data frames or graph objects.
 #' @param return_type using \code{list} (the default) will provide a list object containing vectors of outgoing and incoming node IDs associated with edges. With \code{df}, a data frame containing outgoing and incoming node IDs associated with edges. With \code{vector} or \code{string}, a vector of character objects representing the edges is provided.
 #' @return a list, data frame, or a vector object, depending on the value given to \code{return_type}.
@@ -34,6 +34,8 @@ get_edges <- function(...,
 
     object <- object$edges_df
 
+    no_edges <- FALSE
+
     if ("edge_from" %in% colnames(object)){
 
       from_column <- which(colnames(object) == "edge_from")
@@ -44,7 +46,7 @@ get_edges <- function(...,
 
     } else {
 
-      stop("There is no column with edge information.")
+      no_edges <- TRUE
     }
 
     if ("edge_to" %in% colnames(object)){
@@ -57,7 +59,29 @@ get_edges <- function(...,
 
     } else {
 
-      stop("There is no column with edge information.")
+      no_edges <- TRUE
+    }
+
+    if (return_type == "list" & no_edges == TRUE){
+
+      edge_list[[1]] <- edge_list[[2]] <- NA
+
+      return(edge_list)
+    }
+
+    if (return_type == "df" & no_edges == TRUE){
+
+      edge_df <- as.data.frame(edge_list)
+      colnames(edge_df) <- c("from", "to")
+
+      return(edge_df)
+    }
+
+    if (return_type %in% c("vector", "string") & no_edges == TRUE){
+
+      edge_vector <- NA
+
+      return(edge_vector)
     }
 
     edge_list[[1]] <- c(edge_list[[1]], object[,from_column])

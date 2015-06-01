@@ -2,8 +2,7 @@
 % Please edit documentation in R/create_graph.R
 \name{create_graph}
 \alias{create_graph}
-\title{Create a graph object using data frames representative of nodes and edges
-Generates a graph object using data frames for nodes and/or edges; the graph object can be manipulated by other functions.}
+\title{Create a graph object using data frames representative of nodes and edges}
 \usage{
 create_graph(nodes_df = NULL, edges_df = NULL, graph_attrs = NULL,
   node_attrs = NULL, edge_attrs = NULL, directed = TRUE,
@@ -26,13 +25,12 @@ create_graph(nodes_df = NULL, edges_df = NULL, graph_attrs = NULL,
 
 \item{graph_time}{a date or date-time string (required for insertion of graph into a graph series of the type \code{temporal}).}
 
-\item{graph_tz}{an optional value for the time zone (\code{tz}) value corresponding to the date or date-time string supplied as a value to \code{graph_time}. If no time zone is provided then it will be set to \code{GMT}.}
+\item{graph_tz}{an optional value for the time zone (\code{tz}) corresponding to the date or date-time string supplied as a value to \code{graph_time}. If no time zone is provided then it will be set to \code{GMT}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-Create a graph object using data frames representative of nodes and edges
 Generates a graph object using data frames for nodes and/or edges; the graph object can be manipulated by other functions.
 }
 

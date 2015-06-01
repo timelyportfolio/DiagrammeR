@@ -1,5 +1,5 @@
 #' Get detailed information on nodes
-#' Obtain a data frame with detailed information on nodes and their interrelationships within a graph.
+#' @description Obtain a data frame with detailed information on nodes and their interrelationships within a graph.
 #' @param graph a graph object of class \code{dgr_graph}.
 #' @return a data frame containing information specific to each node within the graph.
 #' @export node_info
@@ -16,16 +16,8 @@ node_info <- function(graph){
     return(node_properties)
   }
 
-  if ("edge_from" %in% colnames(graph$edges_df)){
-    edge_from <- graph$edges_df$edge_from
-  }
-
   if ("from" %in% colnames(graph$edges_df)){
     edge_from <- graph$edges_df$from
-  }
-
-  if ("edge_to" %in% colnames(graph$edges_df)){
-    edge_to <- graph$edges_df$edge_to
   }
 
   if ("to" %in% colnames(graph$edges_df)){
@@ -94,7 +86,7 @@ node_info <- function(graph){
       # Get degree for each node
       #
 
-      degree <- sum(c(graph$edges_df$edge_from, graph$edges_df$edge_to) %in%
+      degree <- sum(c(graph$edges_df$from, graph$edges_df$to) %in%
                       ordered_nodes[i])
       #
       # Get indegree for each node
@@ -140,12 +132,14 @@ node_info <- function(graph){
       # Get number of loops for each node
       #
 
-      loops <- sum(graph$edges_df$edge_from == graph$edges_df$edge_to &
-                     graph$edges_df$edge_to == ordered_nodes[i])
+      loops <- sum(graph$edges_df$from == graph$edges_df$to &
+                     graph$edges_df$to == ordered_nodes[i])
 
       # Collect information into the 'node_properties' data frame
       node_properties[i, 1] <- ordered_nodes[i]
-      node_properties[i, 2] <- labels[which(all_nodes %in% ordered_nodes[i])]
+      node_properties[i, 2] <- ifelse(!is.null(labels[which(all_nodes %in% ordered_nodes[i])]),
+                                      labels[which(all_nodes %in% ordered_nodes[i])],
+                                      NA)
       node_properties[i, 3] <- ifelse(exists("type"),
                                       type[which(all_nodes %in% ordered_nodes[i])],
                                       rep(NA, length(ordered_nodes)))

@@ -1,5 +1,5 @@
 #' Determine whether a specified edge is present in an existing graph object
-#' From a graph object of class \code{dgr_graph}, determine whether a directed edge (defined by a pair of node IDs extant in the graph) is present.
+#' @description From a graph object of class \code{dgr_graph}, determine whether a directed edge (defined by a pair of node IDs extant in the graph) is present.
 #' @param graph a graph object of class \code{dgr_graph} that is created using \code{create_graph}.
 #' @param from a node ID from which the edge to be queried is outgoing.
 #' @param to a node ID to which the edge to be queried is incoming.
@@ -20,7 +20,7 @@ edge_present <- function(graph,
     stop("Only single nodes for 'from' and 'to' should be specified.")
   }
 
-  # Determine whether pair of node provided are in the graph
+  # Determine whether pair of nodes provided are in the graph
   if (from_is_single_value == TRUE & to_is_single_value == TRUE){
 
     nodes_available_in_graph <- ifelse(all(c(from, to) %in% get_nodes(graph)), TRUE, FALSE)
@@ -35,8 +35,8 @@ edge_present <- function(graph,
   # Determine whether a matching edge is available in the graph
   if (nodes_available_in_graph){
 
-    edge_is_in_graph <- ifelse(any(graph$edges_df$edge_from == from &
-                                     graph$edges_df$edge_to == to),
+    edge_is_in_graph <- ifelse(any(graph$edges_df$from == from &
+                                     graph$edges_df$to == to),
                                TRUE, FALSE)
 
     return(edge_is_in_graph)

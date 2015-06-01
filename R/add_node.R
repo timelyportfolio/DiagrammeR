@@ -1,5 +1,5 @@
 #' Add a node to an existing graph object
-#' With a graph object of class \code{dgr_graph}, add a new node of a specified type to extant nodes within the graph.
+#' @description With a graph object of class \code{dgr_graph}, add a new node of a specified type to extant nodes within the graph.
 #' @param graph a graph object of class \code{dgr_graph} that is created using \code{create_graph}.
 #' @param node a node ID for the newly connected node.
 #' @param from an optional vector containing node IDs from which edges will be directed to the new node.
@@ -36,7 +36,6 @@ add_node <- function(graph,
 
   if (can_add_node_id == FALSE){
 
-    message("The node is already present in the graph.")
     return(graph)
   }
 
@@ -92,6 +91,9 @@ add_node <- function(graph,
       dgr_graph <-
         create_graph(nodes_df = combined_nodes,
                      edges_df = combined_edges,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)
@@ -112,32 +114,29 @@ add_node <- function(graph,
       return(graph)
     }
 
-    if (from_nodes_available){
+    combined_nodes <- combine_nodes(graph$nodes_df,
+                                    create_nodes(nodes = node,
+                                                 label = label,
+                                                 type = type))
 
-      combined_nodes <- combine_nodes(graph$nodes_df,
-                                      create_nodes(nodes = node,
-                                                   label = label,
-                                                   type = type))
+    if (node_attributes_provided == TRUE){
 
-      if (node_attributes_provided == TRUE){
+      for (i in 1:length(node_attributes)){
 
-        for (i in 1:length(node_attributes)){
+        if (names(node_attributes)[i] %in% colnames(combined_nodes)){
 
-          if (names(node_attributes)[i] %in% colnames(combined_nodes)){
+          combined_nodes[nrow(combined_nodes),
+                         which(colnames(combined_nodes) == names(node_attributes)[i])] <-
+            node_attributes[i][[1]]
+        }
 
-            combined_nodes[nrow(combined_nodes),
-                           which(colnames(combined_nodes) == names(node_attributes)[i])] <-
-              node_attributes[i][[1]]
-          }
+        if (!(names(node_attributes)[i] %in% colnames(combined_nodes))){
 
-          if (!(names(node_attributes)[i] %in% colnames(combined_nodes))){
+          combined_nodes <- cbind(combined_nodes,
+                                  c(rep("", length = nrow(combined_nodes) - 1),
+                                    node_attributes[i][[1]]))
 
-            combined_nodes <- cbind(combined_nodes,
-                                    c(rep("", length = nrow(combined_nodes) - 1),
-                                      node_attributes[i][[1]]))
-
-            colnames(combined_nodes)[ncol(combined_nodes)] <- names(node_attributes)[i]
-          }
+          colnames(combined_nodes)[ncol(combined_nodes)] <- names(node_attributes)[i]
         }
       }
 
@@ -145,9 +144,13 @@ add_node <- function(graph,
                                       create_edges(edge_from = rep(node, length(to)),
                                                    edge_to = to))
 
+      # Create the revised graph object
       dgr_graph <-
         create_graph(nodes_df = combined_nodes,
                      edges_df = combined_edges,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)
@@ -211,9 +214,13 @@ add_node <- function(graph,
                                       create_edges(edge_from = rep(node, length(to)),
                                                    edge_to = to))
 
+      # Create the revised graph object
       dgr_graph <-
         create_graph(nodes_df = combined_nodes,
                      edges_df = combined_edges,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)
@@ -276,6 +283,9 @@ add_node <- function(graph,
       dgr_graph <-
         create_graph(nodes_df = combined_nodes,
                      edges_df = graph$edges_df,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)
@@ -289,6 +299,9 @@ add_node <- function(graph,
       dgr_graph <-
         create_graph(nodes_df = combined_nodes,
                      edges_df = graph$edges_df,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
                      graph_name = graph$graph_name,
                      graph_time = graph$graph_time,
                      graph_tz = graph$graph_tz)

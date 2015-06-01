@@ -1,12 +1,12 @@
 #' Add graph object to a graph series object
-#' Add a graph object to an extant graph series object for storage of multiple graphs across a sequential or temporal one-dimensional array.
+#' @description Add a graph object to an extant graph series object for storage of multiple graphs across a sequential or temporal one-dimensional array.
 #' @param graph a graph object to add to the graph series object.
 #' @param graph_series a graph series object to which the graph object will be added.
 #' @return a graph series object of type \code{dgr_graph_1D}.
-#' @export add_to_graph_series
+#' @export add_to_series
 
-add_to_graph_series <- function(graph,
-                                graph_series){
+add_to_series <- function(graph,
+                          graph_series){
 
   # Get the series type
   series_type <- graph_series$series_type
@@ -14,12 +14,14 @@ add_to_graph_series <- function(graph,
   # Stop function if graph is not valid
   if (class(graph) != "dgr_graph"){
 
+    message("The supplied graph object is not valid.")
     return(graph_series)
   }
 
   # Stop function if graph series type is not valid
   if (!(series_type %in% c("sequential", "temporal"))){
 
+    message("The graph series type is neither 'sequential' nor 'temporal'")
     return(graph_series)
   }
 
@@ -40,6 +42,7 @@ add_to_graph_series <- function(graph,
 
     if (is_time_provided == FALSE){
 
+      message("No time information is provided in this graph object.")
       return(graph_series)
     } else {
 
@@ -61,11 +64,13 @@ add_to_graph_series <- function(graph,
 
       if (is_time_in_correct_format == FALSE){
 
+        message("The time provided in this graph object is not in the correct format.")
         return(graph_series)
       }
 
       if (is_tz_in_correct_format == FALSE){
 
+        message("The time zone provided in this graph object is not in the correct format.")
         return(graph_series)
       }
 
