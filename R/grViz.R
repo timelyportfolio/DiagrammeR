@@ -129,6 +129,19 @@ grVizOutput <- function(outputId,
 #' you want to save an expression in a variable.
 #' @seealso \code{\link{grVizOutput}} for an example in Shiny
 #' @export
+#' @examples
+#' library(DiagrammeR)
+#'
+#' add_mathjax(
+#'   grViz(
+#' '
+#' digraph G {
+#'   A [label="$\\\\cos (2\\\\theta) = \\\\cos^2 \\\\theta - \\\\sin^2 \\\\theta$"];
+#'   A -> B;
+#' }
+#' '
+#'   )
+#' )
 renderGrViz <- function(expr,
                         env = parent.frame(),
                         quoted = FALSE) {
@@ -139,4 +152,50 @@ renderGrViz <- function(expr,
                     grVizOutput,
                     env,
                     quoted = TRUE)
+}
+
+
+#' Add MathJax To Your 'grViz' Diagram
+#'
+#' This is an experimental feature with some known weaknesses, but
+#' we consider the weaknesses worthwhile to add this bit of super
+#' functionality to your diagram.
+#'
+#' @param grViz a \code{grViz} htmlwidget
+#' @param include_mathjax \code{logical} to add mathjax js.  Change
+#'   to \code{FALSE} if using with \code{rmarkdown} since
+#'   MathJax will likely already be added.
+#'
+#' @return a \code{grViz} htmlwidget
+#' @export
+
+add_mathjax <- function(gv = NULL, include_mathjax = TRUE) {
+  stopifnot(!is.null(gv), inherits(gv,"grViz"))
+
+  gv$dependencies <- c(
+    gv$dependencies,
+    list(htmltools::htmlDependency(
+      name="svg_mathjax2",
+      version="0.1.0",
+      src=c(href="https://cdn.rawgit.com/timelyportfolio/svg_mathjax2/master/"),
+      script="svg_mathjax2.js"
+    ))
+  )
+  if(include_mathjax){
+    browsable(htmltools::tagList(
+      gv,
+      htmltools::tags$script(src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG"),
+      htmlwidgets::onStaticRenderComplete(
+        "setTimeout(function(){new Svg_MathJax().install()},3000);"
+      )
+    ))
+  } else {
+    browsable(htmltools::tagList(
+      gv,
+      htmlwidgets::onStaticRenderComplete(
+        "setTimeout(function(){new Svg_MathJax().install()},3000);"
+      )
+    ))
+  }
+
 }
